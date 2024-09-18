@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { LoginUserDto } from '../dto/login-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 const saltOrRounds = 10;
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(user: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(user.password, saltOrRounds);
@@ -19,7 +23,11 @@ export class AuthService {
         password: hashedPassword,
       },
     });
-    return newUser;
+    const payload = { id: newUser.id, email: newUser.email };
+    return {
+      access_token: this.jwtService.sign(payload),
+      ...newUser,
+    };
   }
 
   async login(user: LoginUserDto) {
@@ -39,6 +47,12 @@ export class AuthService {
       throw new Error('Invalid password');
     }
     delete existingUser.password; // Remove password from the response
-    return existingUser;
+
+    const payload = { id: existingUser.id, email: existingUser.email };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      ...existingUser,
+    };
   }
 }

@@ -1,7 +1,15 @@
-import { Controller, Get, Body, Param, Delete, Put } from '@nestjs/common';
-import { UserService } from './user.service';
+import {
+  Controller,
+  Get,
+  Body,
+  Param,
+  Delete,
+  Put,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { UserService } from '../user/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -9,6 +17,15 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.users({});
+  }
+
+  @Get('me')
+  getProfile(@Req() request: Request) {
+    const user = request['user'];
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return this.userService.user({ id: user.id });
   }
 
   @Get(':id')
