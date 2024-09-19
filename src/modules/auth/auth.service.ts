@@ -23,7 +23,7 @@ export class AuthService {
         password: hashedPassword,
       },
     });
-    const payload = { id: newUser.id, email: newUser.email };
+    const payload = { sub: newUser.id, name: newUser.name };
     return {
       access_token: this.jwtService.sign(payload),
       ...newUser,
@@ -36,7 +36,7 @@ export class AuthService {
       select: { id: true, email: true, password: true, name: true, age: true },
     });
     if (!existingUser) {
-      throw new Error('User not found');
+      throw new Error('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -44,11 +44,11 @@ export class AuthService {
       existingUser.password,
     );
     if (!isPasswordValid) {
-      throw new Error('Invalid password');
+      throw new Error('Invalid credentials');
     }
     delete existingUser.password; // Remove password from the response
 
-    const payload = { id: existingUser.id, email: existingUser.email };
+    const payload = { sub: existingUser.id, name: existingUser.name };
 
     return {
       access_token: this.jwtService.sign(payload),

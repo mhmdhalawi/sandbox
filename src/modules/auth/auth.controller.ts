@@ -1,9 +1,20 @@
-import { Body, Controller, HttpCode, Post, Session } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Request,
+  Session,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 
 import { AuthService } from './auth.service';
 import { Public } from 'src/decorators/public';
+import { LocalAuthGuard } from './guards/local.guard';
+import { JwtAuthGuard } from './guards/jwt.guard';
 
 @Public()
 @Controller('auth')
@@ -35,5 +46,17 @@ export class AuthController {
   async logout(@Session() session: Record<string, any>) {
     session.user = null; // Clear user session
     return { message: 'Logged out successfully' };
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post('passport-login')
+  async passportLogin(@Request() req: any) {
+    return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('passport-profile')
+  async passportProfile(@Request() req: any) {
+    return req.user;
   }
 }

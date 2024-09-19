@@ -5,8 +5,8 @@ import {
   Param,
   Delete,
   Put,
-  Req,
   UnauthorizedException,
+  Session,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,12 +20,12 @@ export class UserController {
   }
 
   @Get('me')
-  getProfile(@Req() request: Request) {
-    const user = request['user'];
-    if (!user) {
+  getProfile(@Session() session: Record<string, any>) {
+    const userId = session.user;
+    if (!userId) {
       throw new UnauthorizedException();
     }
-    return this.userService.user({ id: user.id });
+    return this.userService.user({ id: userId });
   }
 
   @Get(':id')
