@@ -6,9 +6,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     super({
       omit: {
-        user: {
-          password: true,
-        },
+        // omit fields that are not needed
+        // user: {
+        //   password: true,
+        // },
       },
     });
   }

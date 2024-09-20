@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -24,6 +24,8 @@ export class AuthService {
       },
     });
     const payload = { sub: newUser.id, name: newUser.name };
+    // Remove admin status from the response
+    // delete newUser.admin;
     return {
       access_token: this.jwtService.sign(payload),
       ...newUser,
@@ -33,7 +35,6 @@ export class AuthService {
   async login(user: LoginUserDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: user.email },
-      select: { id: true, email: true, password: true, name: true, age: true },
     });
     if (!existingUser) {
       throw new Error('Invalid credentials');
@@ -46,7 +47,8 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
-    delete existingUser.password; // Remove password from the response
+    // Remove password from the response
+    // delete existingUser.password;
 
     const payload = { sub: existingUser.id, name: existingUser.name };
 

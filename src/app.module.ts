@@ -5,8 +5,11 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
+import { PostModule } from './modules/post/post.module';
+import { PrismaModule } from './modules/prisma/prisma.module';
+import { UserInterceptor } from './interceptors/user.interceptor';
 
 @Module({
   imports: [
@@ -19,6 +22,8 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
 
     AuthModule,
     UserModule,
+    PostModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [
@@ -26,6 +31,10 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UserInterceptor,
     },
   ],
 })

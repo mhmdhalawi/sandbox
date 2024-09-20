@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ISession } from 'src/types/session';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -20,7 +21,7 @@ export class UserController {
   }
 
   @Get('me')
-  getProfile(@Session() session: Record<string, any>) {
+  getProfile(@Session() session: ISession) {
     const userId = session.user;
     if (!userId) {
       throw new UnauthorizedException();

@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { Public } from 'src/decorators/public';
 import { LocalAuthGuard } from './guards/local.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { ISession } from 'src/types/session';
 
 @Public()
 @Controller('auth')
@@ -23,7 +24,7 @@ export class AuthController {
 
   @Post('register')
   async create(
-    @Session() session: Record<string, any>,
+    @Session() session: ISession,
     @Body() createUserDto: CreateUserDto,
   ) {
     const user = await this.authService.signup(createUserDto);
@@ -33,17 +34,14 @@ export class AuthController {
 
   @HttpCode(200)
   @Post()
-  async login(
-    @Session() session: Record<string, any>,
-    @Body() credentials: LoginUserDto,
-  ) {
+  async login(@Session() session: ISession, @Body() credentials: LoginUserDto) {
     const currentUser = await this.authService.login(credentials);
     session.user = currentUser.id; // Store user ID in session
     return currentUser;
   }
 
   @Post('logout')
-  async logout(@Session() session: Record<string, any>) {
+  async logout(@Session() session: ISession) {
     session.user = null; // Clear user session
     return { message: 'Logged out successfully' };
   }
