@@ -4,9 +4,9 @@ import {
   Body,
   Param,
   Delete,
-  Put,
   UnauthorizedException,
   Session,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -34,18 +34,19 @@ export class UserController {
     return this.userService.user({ id });
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser({
-      where: { id },
-      data: updateUserDto,
-    });
+  @Patch(':id')
+  update(
+    @Session() session: ISession,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.updateUser(session.user, id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.deleteUser({
-      id,
-    });
+  async remove(@Session() session: ISession, @Param('id') id: string) {
+    await this.userService.deleteUser(session.user, id);
+
+    return { message: 'User deleted successfully' };
   }
 }
